@@ -10,7 +10,7 @@ import es.leandro.modelo.dao.IClienteDAO;
 import es.leandro.modelo.entity.Cliente;
 
 @Service
-public class ClienteService implements IClienteServices {
+public class ClienteService implements IClienteService {
 
 	@Autowired
 	private IClienteDAO cliDao;
@@ -19,6 +19,22 @@ public class ClienteService implements IClienteServices {
 	@Transactional(readOnly=true)
 	public List<Cliente> findAll() {
 		return (List<Cliente>) cliDao.findAll();
+	}
+
+	@Override
+	@Transactional(readOnly=true)
+	public Cliente findById(Long id) {
+		return cliDao.findById(id).orElse(null);
+	}
+
+	@Override
+	public Cliente save(Cliente cli) {
+		return cliDao.save(cli);
+	}
+
+	@Override
+	public void delete(Long id) {
+		cliDao.deleteById(id);
 	}
 
 }
