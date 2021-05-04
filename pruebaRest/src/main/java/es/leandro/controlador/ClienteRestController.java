@@ -3,11 +3,15 @@ package es.leandro.controlador;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +20,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import es.leandro.modelo.entity.Cliente;
@@ -59,22 +62,31 @@ public class ClienteRestController {
 	}
 
 	@PostMapping("/clientes")
-	public ResponseEntity<?> agregar(@RequestBody Cliente cli) {
+	public ResponseEntity<?> agregar(@Valid @RequestBody Cliente cli, BindingResult result) {
+		Map<String, Object> response = new HashMap<>();
+
 		Cliente cliNew = null;
 
-		Map<String, Object> response = new HashMap<>();
+		if (result.hasErrors()) {
+			List<String> errors = result.getFieldErrors().stream()
+					.map(err -> "'" + err.getField() + "': " + err.getDefaultMessage())
+					.collect(Collectors.toList());
+
+			response.put("mensaje", "Error agregar el cliente");
+			response.put("error", errors);
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
+		}
 
 		try {
 			cliNew = cliServ.save(cli);
 		} catch (DataAccessException e) {
-			response.put("mensaje", "Error al guardar el cliente con ID: ".concat(cli.getId().toString()));
+			response.put("mensaje", "Error agregar el cliente");
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
 		}
 
 		if (cliNew == null) {
-			response.put("mensaje", "El cliente con ID: ".concat(cli.getId().toString())
-					.concat(" no se puede agregar a la base de datos."));
+			response.put("mensaje", "El cliente no se puede agregar a la base de datos.");
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
 
@@ -84,9 +96,19 @@ public class ClienteRestController {
 	}
 
 	@PutMapping("/clientes/{id}")
-	public ResponseEntity<?> modificar(@RequestBody Cliente cli, @PathVariable Long id) {
+	public ResponseEntity<?> modificar(@Valid @RequestBody Cliente cli, BindingResult result, @PathVariable Long id) {
 		Cliente act = null;
 		Map<String, Object> response = new HashMap<>();
+
+		if (result.hasErrors()) {
+			List<String> errors = result.getFieldErrors().stream()
+					.map(err -> "'" + err.getField() + "': " + err.getDefaultMessage())
+					.collect(Collectors.toList());
+
+			response.put("mensaje", "Error modificar el cliente");
+			response.put("error", errors);
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
+		}
 
 		try {
 			act = cliServ.findById(id);
@@ -104,9 +126,9 @@ public class ClienteRestController {
 
 			cliServ.save(act);
 		} catch (DataAccessException e) {
-			response.put("mensaje", "Error al actualizar el cliente con ID: ".concat(cli.getId().toString()));
+			response.put("mensaje", "Error al actualizar el cliente con ID: ".concat(id.toString()));
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
 		}
 
 		response.put("mensaje", "El cliente ha sido actualizado con éxito");
@@ -118,6 +140,7 @@ public class ClienteRestController {
 	@DeleteMapping("/clientes/{id}")
 	public ResponseEntity<?> borrar(@PathVariable Long id) {
 		Map<String, Object> response = new HashMap<>();
+
 		try {
 			cliServ.delete(id);
 		} catch (DataAccessException e) {

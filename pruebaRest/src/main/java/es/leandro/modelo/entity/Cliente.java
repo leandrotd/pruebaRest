@@ -12,25 +12,34 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 
 @Entity
-@Table(name="clientes")
+@Table(name = "clientes")
 public class Cliente implements Serializable {
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
-	@Column(nullable=false)
+
+	@NotEmpty
+	@Size(min = 3, max = 12)
+	@Column(nullable = false)
 	private String nombre;
 
+	@NotEmpty
+	@Size(min = 3, max = 12)
 	@Column
 	private String apellido;
 
-	@Column(nullable=false, unique=true)
+	@NotEmpty
+	@Email(message = "debe tener un formato válido")
+	@Column(nullable = false, unique = true)
 	private String email;
 
-	@Column(name="create_at")
+	@Column(name = "create_at")
 	@Temporal(TemporalType.DATE)
 	private Date createAt;
 
@@ -38,7 +47,7 @@ public class Cliente implements Serializable {
 	public void prePersist() {
 		createAt = new Date();
 	}
-	
+
 	public Long getId() {
 		return id;
 	}
