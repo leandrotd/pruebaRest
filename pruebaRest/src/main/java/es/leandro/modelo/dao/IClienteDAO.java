@@ -1,9 +1,9 @@
 package es.leandro.modelo.dao;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import es.leandro.modelo.entity.Cliente;
 
-public interface IClienteDAO extends CrudRepository<Cliente, Long> {
+public interface IClienteDAO extends JpaRepository<Cliente, Long> {
 
 }
