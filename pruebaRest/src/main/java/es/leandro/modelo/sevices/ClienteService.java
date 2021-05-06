@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import es.leandro.modelo.dao.IClienteDAO;
 import es.leandro.modelo.entity.Cliente;
+import es.leandro.modelo.entity.Region;
 
 @Service
 public class ClienteService implements IClienteService {
@@ -36,13 +37,21 @@ public class ClienteService implements IClienteService {
 	}
 
 	@Override
+	@Transactional
 	public Cliente save(Cliente cli) {
 		return cliDao.save(cli);
 	}
 
 	@Override
+	@Transactional
 	public void delete(Long id) {
 		cliDao.deleteById(id);
+	}
+
+	@Override
+	@Transactional(readOnly=true)
+	public List<Region> findAllRegiones() {
+		return cliDao.findAllRegiones();
 	}
 
 }

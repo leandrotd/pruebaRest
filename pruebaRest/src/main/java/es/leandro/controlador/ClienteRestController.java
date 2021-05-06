@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import es.leandro.modelo.entity.Cliente;
+import es.leandro.modelo.entity.Region;
 import es.leandro.modelo.sevices.IClienteService;
 import es.leandro.modelo.sevices.IUploadFileService;
 
@@ -41,10 +42,10 @@ public class ClienteRestController {
 
 	@Autowired
 	private IClienteService cliServ;
-	
+
 	@Autowired
 	private IUploadFileService uplServ;
-	
+
 	@GetMapping("/clientes")
 	public List<Cliente> index() {
 		return cliServ.findAll();
@@ -138,6 +139,8 @@ public class ClienteRestController {
 			act.setApellido(cli.getApellido());
 			act.setEmail(cli.getEmail());
 			act.setNombre(cli.getNombre());
+			act.setCreateAt(cli.getCreateAt());
+			act.setRegion(cli.getRegion());
 
 			cliServ.save(act);
 		} catch (DataAccessException e) {
@@ -158,9 +161,9 @@ public class ClienteRestController {
 
 		try {
 			Cliente cli = cliServ.findById(id);
-			
+
 			uplServ.eliminar(cli.getFoto());
-			
+
 			cliServ.delete(id);
 		} catch (DataAccessException e) {
 			response.put("mensaje", "Error al borrar el cliente con ID: ".concat(id.toString()));
@@ -175,10 +178,10 @@ public class ClienteRestController {
 	@PostMapping("/clientes/upload")
 	public ResponseEntity<?> upload(@RequestParam("archivo") MultipartFile archivo, @RequestParam("id") Long id) {
 		Map<String, Object> response = new HashMap<>();
-		
+
 		Cliente cli = cliServ.findById(id);
-		
-		if(!archivo.isEmpty()) {
+
+		if (!archivo.isEmpty()) {
 			String nomArchivo = null;
 			try {
 				nomArchivo = uplServ.copiar(archivo);
@@ -188,35 +191,40 @@ public class ClienteRestController {
 				response.put("error", e.getMessage().concat(": ").concat(e.getCause().getMessage()));
 				return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 			}
-			
+
 			String fotoAnterior = cli.getFoto();
-			
+
 			uplServ.eliminar(fotoAnterior);
-			
+
 			cli.setFoto(nomArchivo);
-			
+
 			cliServ.save(cli);
-			
+
 			response.put("cliente", cli);
 			response.put("mensaje", "Imagen subida correctamente");
 		}
-		
+
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
-	
+
 	@GetMapping("/upload/img/{nombreFoto:.+}")
-	public ResponseEntity<Resource> verFoto(@PathVariable String nombreFoto){
+	public ResponseEntity<Resource> verFoto(@PathVariable String nombreFoto) {
 		Resource recurso = null;
-		
+
 		try {
 			recurso = uplServ.cargar(nombreFoto);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
-		
+
 		HttpHeaders cabecera = new HttpHeaders();
 		cabecera.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + recurso.getFilename() + "\"");
-		
-		return new ResponseEntity<Resource> (recurso, cabecera, HttpStatus.OK);
+
+		return new ResponseEntity<Resource>(recurso, cabecera, HttpStatus.OK);
+	}
+
+	@GetMapping("/clientes/regiones")
+	public List<Region> listarRegiones() {
+		return cliServ.findAllRegiones();
 	}
 }
