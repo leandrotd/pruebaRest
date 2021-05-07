@@ -15,3 +15,13 @@ insert into clientes (region_id, nombre, apellido, email, create_at) values (4, 
 insert into clientes (region_id, nombre, apellido, email, create_at) values (5, 'nom9', 'ap9', 'em9@il', '2020-01-09');
 insert into clientes (region_id, nombre, apellido, email, create_at) values (5, 'nom10', 'ap10', 'em10@il', '2020-01-10');
 insert into clientes (region_id, nombre, apellido, email, create_at) values (5, 'nom11', 'ap11', 'em11@il', '2020-01-11');
+
+insert into `usuarios` (username, password, enabled, nombre, apellidos, email) values ('andres', '$2a$10$ZJAQs3Ltu6D3PectmFr4qOUxdUdksuHQ.s35iBzIx3ZgmxD8yiSAm', 1, 'andres', 'guzman', 'correo@correo.es');
+insert into `usuarios` (username, password, enabled, nombre, apellidos, email) values ('admin', '$2a$10$rKYKA06NsYviU801M7B/pe9cdYap0h2fk2.D2f.QA7e4A83saeYYm', 1, 'nombre', 'apellido', 'em@i.l');
+
+insert into `roles` (nombre) values ('ROLE_USER');
+insert into `roles` (nombre) values ('ROLE_ADMIN');
+
+insert into `usuarios_roles` (usuario_id, roles_id) values (1,1);
+insert into `usuarios_roles` (usuario_id, roles_id) values (2,2);
+insert into `usuarios_roles` (usuario_id, roles_id) values (2,1);
