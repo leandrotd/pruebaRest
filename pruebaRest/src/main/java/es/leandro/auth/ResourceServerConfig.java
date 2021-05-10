@@ -24,7 +24,8 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 		http.authorizeRequests()
 				.antMatchers(HttpMethod.GET, "/api/clientes", "/api/clientes/pag/**", "/api/upload/img/**",
 						"/images/**")
-				.permitAll().anyRequest().authenticated().and().cors().configurationSource(corsConfigurationSource());
+				.permitAll().antMatchers("/api/cliente/{id}").permitAll().antMatchers("/api/facturas/**").permitAll()
+				.anyRequest().authenticated().and().cors().configurationSource(corsConfigurationSource());
 	}
 
 	@Bean
@@ -39,13 +40,14 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 		source.registerCorsConfiguration("/**", configuration);
 		return source;
 	}
-	
+
 	@Bean
-	public FilterRegistrationBean<CorsFilter> corsFilter(){
-		FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<CorsFilter>(new CorsFilter(corsConfigurationSource()));
-		
+	public FilterRegistrationBean<CorsFilter> corsFilter() {
+		FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<CorsFilter>(
+				new CorsFilter(corsConfigurationSource()));
+
 		bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
-		
+
 		return bean;
 	}
 }
